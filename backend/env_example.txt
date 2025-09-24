@@ -1,0 +1,8 @@
+# Configuração da API
+API_TOKEN=seu_token_secreto_aqui
+
+# Configuração da OpenAI
+OPENAI_API_KEY=sua_chave_openai_aqui
+
+# Configuração do banco de dados vetorial
+PERSIST_DIRECTORY=./chromadb

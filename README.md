@@ -1,340 +1,283 @@
-# Sistema de Busca de Documentos com IA
+# 🤖 Sistema de Busca de Documentos com IA
 
-Este projeto implementa um sistema de busca de documentos usando LangChain, ChromaDB e modelos de IA da OpenAI. O sistema permite carregar documentos e fazer consultas inteligentes sobre seu conteúdo.
+Sistema completo para carregar documentos e fazer consultas inteligentes usando LangChain, OpenAI e uma interface web moderna.
 
-## Funcionalidades
+## 🏗️ Arquitetura
 
-- **Carregamento de documentos**: Suporte para arquivos de texto (.txt)
-- **Busca inteligente**: Utiliza embeddings e Max Marginal Relevance Search para reduzir redundância
-- **API REST**: Interface FastAPI para integração com outras aplicações
-- **Interface de linha de comando**: Fácil de usar via terminal
-- **Configuração centralizada**: Parâmetros organizados em arquivo de configuração
-- **Documentação automática**: Swagger UI integrado
-
-## Estrutura do Projeto
+O projeto está organizado em duas partes principais:
 
 ```
-readDoc/
-├── api.py                 # API FastAPI principal
-├── run_api.py             # Script para executar a API
-├── document_service.py    # Serviço de documentos
-├── models.py              # Modelos Pydantic
-├── main.py                # Script CLI (legado)
-├── filter_retriever.py    # Retriever personalizado
-├── config.py              # Configurações do sistema
-├── requirements.txt       # Dependências Python
-├── convert.py             # Utilitário de conversão (legado)
-├── main2.py               # Script alternativo (legado)
-├── chromadb/              # Banco de dados ChromaDB
-├── historia.txt           # Arquivo de exemplo
-├── História_do_Brasil.pdf # PDF de exemplo
-└── README.md              # Este arquivo
+📁 readDoc/
+├── 📁 backend/          # API REST com FastAPI
+├── 📁 frontend/         # Interface web com Streamlit
+├── 📄 README.md         # Este arquivo
+└── 📄 .gitignore        # Arquivos ignorados pelo Git
 ```
 
-## Instalação
+## 🚀 Início Rápido
 
-1. Clone o repositório ou baixe os arquivos
-2. Instale as dependências:
-   ```bash
-   pip install langchain langchain-openai langchain-community langchain-chroma chromadb python-dotenv
-   ```
-
-3. Configure suas chaves da OpenAI no arquivo `.env`:
-   ```
-   OPENAI_API_KEY=sua_chave_aqui
-   ```
-
-## Uso
-
-### 🔐 Autenticação
-
-A API utiliza autenticação via **Bearer Token**. Todos os endpoints (exceto `/` e `/health`) requerem autenticação.
-
-#### Níveis de Permissão:
-
-- **Admin**: Acesso completo (leitura, escrita, gerenciamento)
-- **User**: Apenas leitura (consultas e status)
-
-#### Como usar:
-
-1. Inclua o header `Authorization` em todas as requisições:
-   ```
-   Authorization: Bearer seu_token_aqui
-   ```
-
-2. Use a documentação interativa em `/docs` para testar com autenticação
-
-### 🚀 API REST (Recomendado)
-
-#### 1. Configurar Autenticação
-
-A API agora requer autenticação via Bearer Token. Configure o token no arquivo `.env`:
+### 1. Backend (API)
 
 ```bash
-# Copie o arquivo de exemplo
+cd backend
+pip install -r requirements.txt
 cp env_example.txt .env
-
-# Edite o arquivo .env e configure seu token
-API_TOKEN=seu_token_secreto_aqui
+# Edite o .env com sua chave OpenAI
+python start_api.py
 ```
 
-**Tokens disponíveis para teste:**
-- `seu_token_secreto_aqui` (Admin - permissões completas)
-- `admin_token_123` (Admin - permissões completas)  
-- `user_token_456` (User - apenas leitura)
+**Acesse**: http://localhost:8000/docs
 
-#### 2. Iniciar a API
+### 2. Frontend (Interface)
 
 ```bash
-python run_api.py
-```
-
-A API estará disponível em:
-- **API**: http://localhost:8000
-- **Documentação**: http://localhost:8000/docs
-- **Health Check**: http://localhost:8000/health
-
-#### 3. Carregar Documentos via API
-
-```bash
-curl -X POST "http://localhost:8000/documents/load" \
-     -H "Content-Type: application/json" \
-     -H "Authorization: Bearer seu_token_secreto_aqui" \
-     -d '{
-       "file_path": "historia.txt",
-       "chunk_size": 600,
-       "chunk_overlap": 200
-     }'
-```
-
-#### 4. Fazer Consultas via API
-
-```bash
-curl -X POST "http://localhost:8000/query" \
-     -H "Content-Type: application/json" \
-     -H "Authorization: Bearer seu_token_secreto_aqui" \
-     -d '{
-       "query": "Quem foi Pedro Alvares Cabral?",
-       "lambda_mult": 0.8,
-       "k_documents": 4
-     }'
-```
-
-#### 5. Verificar Status dos Documentos
-
-```bash
-curl -X GET "http://localhost:8000/documents/status" \
-     -H "Authorization: Bearer seu_token_secreto_aqui"
-```
-
-#### 6. Obter Informações do Usuário
-
-```bash
-curl -X GET "http://localhost:8000/user/me" \
-     -H "Authorization: Bearer seu_token_secreto_aqui"
-```
-
-#### 7. Endpoints Administrativos (apenas para admins)
-
-```bash
-# Listar tokens válidos
-curl -X GET "http://localhost:8000/admin/tokens" \
-     -H "Authorization: Bearer seu_token_secreto_aqui"
-```
-
-### 🖥️ Interface Web (Streamlit)
-
-#### 1. Instalar Dependências do Frontend
-
-```bash
+cd frontend
 pip install -r requirements_frontend.txt
-```
-
-#### 2. Executar o Sistema (Versão Simplificada - Recomendada)
-
-**Terminal 1 - Backend:**
-```bash
-python run_api_simple.py
-```
-
-**Terminal 2 - Frontend:**
-```bash
 python run_frontend_simple.py
 ```
 
-#### 3. Testar o Sistema
+**Acesse**: http://localhost:8501
+
+## 📋 Funcionalidades
+
+### 🔧 Backend
+- **API REST** com FastAPI
+- **Autenticação** Bearer Token
+- **Carregamento** de documentos (PDF, TXT)
+- **Busca Inteligente** com LangChain + OpenAI
+- **Armazenamento Vetorial** com ChromaDB
+- **Documentação** automática com Swagger
+
+### 🎨 Frontend
+- **Interface de Chat** moderna e intuitiva
+- **Histórico de Conversas** com nomes contextuais
+- **Gerenciamento de Arquivos** com upload
+- **Configurações** de autenticação
+- **Navegação** entre chats e histórico
+
+## 🛠️ Tecnologias
+
+### Backend
+- **FastAPI**: Framework web moderno
+- **LangChain**: Framework para IA
+- **OpenAI**: Modelos de linguagem
+- **ChromaDB**: Banco vetorial
+- **Uvicorn**: Servidor ASGI
+
+### Frontend
+- **Streamlit**: Interface web em Python
+- **Requests**: Cliente HTTP
+- **Python-dotenv**: Variáveis de ambiente
+
+## 📚 Documentação
+
+- **[Backend README](backend/README.md)**: Documentação completa da API
+- **[Frontend README](frontend/README.md)**: Documentação da interface
+- **[API Docs](http://localhost:8000/docs)**: Documentação interativa (quando rodando)
+
+## 🔐 Autenticação
+
+O sistema usa Bearer Token para autenticação:
 
 ```bash
-python test_system.py
+Authorization: Bearer seu_token_aqui
 ```
 
-Este script verifica se ambos os serviços estão funcionando corretamente.
+### Tokens Disponíveis
+- **Admin**: `seu_token_secreto_aqui` (acesso completo)
+- **User**: `user_token_456` (apenas leitura)
+- **Admin 2**: `admin_token_123` (acesso completo)
 
-#### 4. URLs de Acesso
+## 🎯 Uso
 
-- **Frontend**: http://localhost:8501
-- **API**: http://localhost:8000
-- **Documentação**: http://localhost:8000/docs
-
-#### 5. Funcionalidades da Interface
-
-- **💬 Chat**: Interface de conversação com IA
-- **📁 Gerenciar Arquivos**: Carregar e visualizar documentos
-- **📚 Histórico**: Acompanhar conversas anteriores
-- **⚙️ Configurações**: Gerenciar tokens e configurações
-- **🔐 Autenticação**: Configuração de Bearer Tokens
-
-#### 6. Como Usar a Interface
-
-1. **Configure o Token**: Na sidebar, insira seu Bearer Token
-2. **Teste a Conexão**: Clique em "Testar Conexão" para verificar
-3. **Navegue**: Use os botões na sidebar para alternar entre páginas
-4. **Chat**: Digite perguntas na área de chat
-5. **Arquivos**: Carregue novos documentos na página de arquivos
-
-### 💻 Interface de Linha de Comando (Legado)
-
-#### Carregar Documentos
-
+### 1. Carregar Documentos
 ```bash
-python main.py --load load --file historia.txt
+curl -X POST "http://localhost:8000/documents/load" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Content-Type: application/json" \
+  -d '{"file_path": "documento.pdf"}'
 ```
 
-#### Fazer Consultas
-
+### 2. Fazer Consultas
 ```bash
-python main.py --load query --task "Sua pergunta aqui"
+curl -X POST "http://localhost:8000/query" \
+  -H "Authorization: Bearer seu_token_aqui" \
+  -H "Content-Type: application/json" \
+  -d '{"query": "Qual é o tema principal do documento?"}'
 ```
 
-#### Exemplo Completo
+### 3. Interface Web
+1. Acesse http://localhost:8501
+2. Configure o token de autenticação
+3. Faça upload de documentos
+4. Inicie conversas com a IA
 
+## 🧪 Testes
+
+### Backend
 ```bash
-# 1. Carregar documento
-python main.py --load load --file historia.txt
-
-# 2. Fazer consulta
-python main.py --load query --task "Quem foi Pedro Alvares Cabral?"
+cd backend
+python test_system.py      # Teste completo
+python test_chat.py        # Teste de chat
+python exemplo_uso.py      # Exemplos de uso
 ```
 
-## Configuração
+### Frontend
+1. Inicie backend e frontend
+2. Acesse http://localhost:8501
+3. Teste todas as funcionalidades da interface
 
-As configurações do sistema podem ser ajustadas no arquivo `config.py`:
+## 📁 Estrutura Detalhada
 
-- **EMBEDDING_MODEL**: Modelo de embedding da OpenAI
-- **CHAT_MODEL**: Modelo de chat da OpenAI
-- **CHUNK_SIZE**: Tamanho dos chunks de texto
-- **CHUNK_OVERLAP**: Sobreposição entre chunks
-- **LAMBDA_MULT**: Parâmetro para Max Marginal Relevance Search
-- **K_DOCUMENTS**: Número de documentos a retornar
+```
+📁 readDoc/
+├── 📁 backend/
+│   ├── 📄 api.py                    # Aplicação FastAPI
+│   ├── 📄 auth.py                   # Sistema de autenticação
+│   ├── 📄 config.py                 # Configurações
+│   ├── 📄 document_service.py       # Serviço de documentos
+│   ├── 📄 models.py                 # Modelos Pydantic
+│   ├── 📄 run_api.py                # Script de execução
+│   ├── 📄 start_api.py              # Inicialização
+│   ├── 📄 requirements.txt          # Dependências
+│   ├── 📄 env_example.txt           # Exemplo de configuração
+│   ├── 📄 test_*.py                 # Scripts de teste
+│   ├── 📄 exemplo_uso.py            # Exemplos
+│   ├── 📄 *.md                      # Documentação
+│   └── 📄 README.md                 # Documentação do backend
+├── 📁 frontend/
+│   ├── 📄 streamlit_app.py          # Aplicação Streamlit
+│   ├── 📄 run_frontend.py           # Script de execução
+│   ├── 📄 requirements_frontend.txt # Dependências
+│   ├── 📁 .streamlit/               # Configurações
+│   └── 📄 README.md                 # Documentação do frontend
+├── 📄 README.md                     # Este arquivo
+└── 📄 .gitignore                    # Arquivos ignorados
+```
 
-## 📡 Endpoints da API
+## 🔧 Configuração
 
-### GET `/`
-- **Descrição**: Informações básicas da API
-- **Resposta**: Status e versão da API
+### Variáveis de Ambiente
 
-### GET `/health`
-- **Descrição**: Health check da API
-- **Resposta**: Status de saúde do sistema
+Crie um arquivo `.env` na pasta `backend/`:
 
-### POST `/documents/load`
-- **Descrição**: Carrega um documento no banco de dados
-- **Body**:
-  ```json
-  {
-    "file_path": "historia.txt",
-    "chunk_size": 600,
-    "chunk_overlap": 200
-  }
-  ```
-- **Resposta**: Status do carregamento e número de documentos
+```env
+API_TOKEN=seu_token_secreto_aqui
+OPENAI_API_KEY=sua_chave_openai_aqui
+PERSIST_DIRECTORY=./chromadb
+```
 
-### POST `/query`
-- **Descrição**: Executa uma consulta nos documentos
-- **Body**:
-  ```json
-  {
-    "query": "Sua pergunta aqui",
-    "lambda_mult": 0.8,
-    "k_documents": 4
-  }
-  ```
-- **Resposta**: Resposta da consulta e documentos utilizados
+### Dependências
 
-### GET `/documents/status`
-- **Descrição**: Retorna o status dos documentos carregados
-- **Resposta**: Informações sobre documentos e banco de dados
-
-## Arquitetura
-
-### API FastAPI
-- **api.py**: Aplicação principal FastAPI com endpoints
-- **document_service.py**: Serviço de negócio para documentos
-- **models.py**: Modelos Pydantic para validação
-
-### DocumentSearchSystem (CLI)
-Classe principal que gerencia:
-- Carregamento de documentos
-- Criação do banco de dados ChromaDB
-- Execução de consultas
-
-### RedundantFilterRetriever
-Retriever personalizado que:
-- Utiliza Max Marginal Relevance Search
-- Reduz redundância nos resultados
-- Melhora a qualidade das respostas
-
-## Dependências
-
-### Core
-- `langchain`: Framework principal para aplicações de IA
-- `langchain-openai`: Integração com modelos da OpenAI
-- `langchain-community`: Componentes da comunidade
-- `langchain-chroma`: Integração com ChromaDB
-- `chromadb`: Banco de dados vetorial
-- `python-dotenv`: Gerenciamento de variáveis de ambiente
-
-### API
-- `fastapi`: Framework web moderno e rápido
-- `uvicorn`: Servidor ASGI para FastAPI
-- `pydantic`: Validação de dados e modelos
-
-## Exemplos de Uso
-
-### Perguntas sobre História do Brasil
-
+**Backend**:
 ```bash
-python main.py --load query --task "Quando foi descoberto o Brasil?"
-python main.py --load query --task "Quais foram as principais capitanias hereditárias?"
-python main.py --load query --task "Explique o período colonial brasileiro"
+cd backend
+pip install -r requirements.txt
 ```
 
-### Perguntas sobre Documentos Técnicos
-
+**Frontend**:
 ```bash
-python main.py --load query --task "Resuma os principais pontos do documento"
-python main.py --load query --task "Quais são as conclusões apresentadas?"
+cd frontend
+pip install -r requirements_frontend.txt
 ```
 
-## Troubleshooting
+## 🚀 Deploy
 
-### Erro de API Key
-Certifique-se de que a variável `OPENAI_API_KEY` está configurada no arquivo `.env`.
+### Desenvolvimento Local
 
-### Erro de Banco de Dados
-Se o banco de dados não existir, execute primeiro o modo `load` para carregar documentos.
+1. **Backend**:
+   ```bash
+   cd backend
+   python start_api.py
+   ```
 
-### Erro de Memória
-Para documentos muito grandes, ajuste `CHUNK_SIZE` e `CHUNK_OVERLAP` no arquivo `config.py`.
+2. **Frontend**:
+   ```bash
+   cd frontend
+   python run_frontend_simple.py
+   ```
 
-## Contribuição
+### Produção
 
-Para contribuir com o projeto:
-1. Faça um fork do repositório
+1. Configure variáveis de ambiente
+2. Use servidores de produção (Gunicorn, Nginx)
+3. Configure HTTPS e domínio
+
+## 🐛 Solução de Problemas
+
+### Erro de Porta em Uso
+```bash
+# Windows
+taskkill /f /im python.exe
+
+# Linux/Mac
+pkill -f python
+```
+
+### Erro de Autenticação
+- Verifique o token no header `Authorization`
+- Confirme se o token está correto
+
+### Erro de OpenAI
+- Verifique a chave da API no arquivo `.env`
+- Confirme se há créditos disponíveis
+
+## 📈 Monitoramento
+
+### Backend
+- Logs detalhados no console
+- Métricas de requisições
+- Status de saúde em `/health`
+
+### Frontend
+- Logs do Streamlit
+- Teste de conectividade
+- Status da API
+
+## 🤝 Contribuição
+
+1. Fork o projeto
 2. Crie uma branch para sua feature
-3. Faça commit das mudanças
-4. Abra um Pull Request
+3. Commit suas mudanças
+4. Push para a branch
+5. Abra um Pull Request
 
-## Licença
+## 📄 Licença
 
-Este projeto está sob a licença MIT. Veja o arquivo LICENSE para mais detalhes.
+Este projeto está sob a licença MIT.
+
+## 📞 Suporte
+
+- **Issues**: Abra uma issue no GitHub
+- **Documentação**: Consulte os READMEs específicos
+- **API Docs**: http://localhost:8000/docs (quando rodando)
+
+## 🎉 Funcionalidades Implementadas
+
+### ✅ Backend
+- [x] API REST com FastAPI
+- [x] Autenticação Bearer Token
+- [x] Carregamento de documentos
+- [x] Busca inteligente com IA
+- [x] Armazenamento vetorial
+- [x] Documentação automática
+- [x] Testes automatizados
+
+### ✅ Frontend
+- [x] Interface de chat moderna
+- [x] Histórico com nomes contextuais
+- [x] Gerenciamento de arquivos
+- [x] Configurações de autenticação
+- [x] Navegação intuitiva
+- [x] Design responsivo
+
+### ✅ Sistema
+- [x] Separação frontend/backend
+- [x] Documentação completa
+- [x] Scripts de execução
+- [x] Testes de integração
+- [x] Configuração flexível
+
+---
+
+**Desenvolvido com ❤️ usando FastAPI, Streamlit, LangChain e OpenAI**
