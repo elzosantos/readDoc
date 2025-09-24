@@ -18,6 +18,8 @@ class RedundantFilterRetriever(BaseRetriever):
     
     embedding: Embeddings
     chroma: Chroma
+    lambda_mult: float = LAMBDA_MULT
+    k_documents: int = K_DOCUMENTS
     
     def get_relevant_documents(self, query: str) -> List[Document]:
         """
@@ -35,8 +37,8 @@ class RedundantFilterRetriever(BaseRetriever):
         # Buscar documentos usando Max Marginal Relevance Search
         documents = self.chroma.max_marginal_relevance_search_by_vector(
             embedding=query_embedding,
-            lambda_mult=LAMBDA_MULT,
-            k=K_DOCUMENTS
+            lambda_mult=self.lambda_mult,
+            k=self.k_documents
         )
         
         return documents
