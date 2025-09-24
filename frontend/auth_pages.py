@@ -8,8 +8,13 @@ import json
 import time
 from typing import Optional, Dict
 
+# Importar o novo gerenciador de sessão
+from session_manager import session_manager, login_user, logout_user, get_current_user, has_permission, is_admin, get_auth_headers, is_authenticated
+
 # Configurações da API
 API_BASE_URL = "http://localhost:8000"
+
+# Funções de sessão agora são gerenciadas pelo session_manager
 
 def make_auth_request(endpoint: str, method: str = "GET", data: Optional[Dict] = None) -> Optional[Dict]:
     """Faz requisição para a API de autenticação"""
@@ -45,8 +50,7 @@ def make_auth_request(endpoint: str, method: str = "GET", data: Optional[Dict] =
 
 def render_login_page():
     """Renderiza a página de login"""
-    st.title("🔐 Login")
-    st.markdown("Faça login para acessar o sistema")
+
     
     with st.form("login_form"):
         email = st.text_input("📧 Email", placeholder="seu@email.com")
@@ -63,19 +67,9 @@ def render_login_page():
         if login_button:
             if email and password:
                 with st.spinner("Fazendo login..."):
-                    response = make_auth_request("/auth/login", "POST", {
-                        "email": email,
-                        "password": password
-                    })
-                    
-                    if response and response.get("success"):
-                        # Salvar dados do usuário na sessão
-                        st.session_state.user = response.get("user")
-                        st.session_state.auth_token = response.get("token")
-                        st.session_state.is_authenticated = True
-                        
-                        # Redirecionar automaticamente para o chat
-                        st.session_state.current_page = "chat"
+                    # Usar o novo sistema de login
+                    if login_user(email, password):
+                        st.success("✅ Login realizado com sucesso!")
                         st.rerun()
                     else:
                         st.error("❌ Email ou senha incorretos")
@@ -138,120 +132,101 @@ def render_auth_page():
     """Renderiza a página principal de autenticação"""
     # Verificar se já está autenticado (com validação real do token)
     if is_authenticated():
-        # Redirecionar automaticamente para o chat
-        st.session_state.current_page = "chat"
+        # Redirecionar automaticamente para o dashboard
+        st.session_state.current_page = "dashboard"
         st.rerun()
         return
     
-    # Mostrar página de login ou cadastro
-    if st.session_state.get("show_register", False):
-        render_register_page()
-    else:
-        render_login_page()
-    
-    # Informações sobre o sistema
-    st.divider()
-    st.markdown("### ℹ️ Sobre o Sistema")
-    st.info("""
-    **Sistema de Busca de Documentos com IA**
-    
-    - 🔍 **Busca Inteligente**: Faça perguntas sobre seus documentos
-    - 📄 **Gerenciamento**: Carregue e organize seus arquivos
-    - 👥 **Perfis**: Usuário comum ou administrador
-    - 🔐 **Seguro**: Autenticação e controle de acesso
-    
-    **Usuário Padrão Admin:**
-    - Email: admin@system.com
-    - Senha: admin123
-    """)
-
-def logout_user():
-    """Realiza logout do usuário"""
-    if st.session_state.get("auth_token"):
-        # Fazer logout na API
-        headers = {"Authorization": f"Bearer {st.session_state.auth_token}"}
-        try:
-            response = requests.post(f"{API_BASE_URL}/auth/logout", headers=headers)
-        except:
-            pass  # Ignorar erros de logout
-    
-    # Limpar dados da sessão
-    st.session_state.user = None
-    st.session_state.auth_token = None
-    st.session_state.is_authenticated = False
-    st.session_state.current_page = "auth"
-    
-    st.success("✅ Logout realizado com sucesso!")
-    st.rerun()
-
-def get_auth_headers() -> Dict[str, str]:
-    """Retorna headers de autenticação para requisições"""
-    token = st.session_state.get("auth_token")
-    if token:
-        return {"Authorization": f"Bearer {token}"}
-    return {}
-
-def is_authenticated() -> bool:
-    """Verifica se o usuário está autenticado"""
-    if not st.session_state.get("is_authenticated", False):
-        return False
-    
-    # Verificar se o token ainda é válido
-    token = st.session_state.get("auth_token")
-    if not token:
-        return False
-    
-    # Verificar se o token expirou (cache local para evitar muitas requisições)
-    last_check = st.session_state.get("last_auth_check", 0)
-    current_time = time.time()
-    
-    # Só verificar com o servidor a cada 5 minutos
-    if current_time - last_check > 300:  # 5 minutos
-        try:
-            headers = {"Authorization": f"Bearer {token}"}
-            response = requests.get(f"{API_BASE_URL}/auth/me", headers=headers, timeout=5)
-            if response.status_code == 200:
-                st.session_state.last_auth_check = current_time
-                return True
-            else:
-                # Token inválido, limpar sessão
-                st.session_state.is_authenticated = False
-                st.session_state.auth_token = None
-                st.session_state.user = None
-                st.session_state.last_auth_check = 0
-                return False
-        except:
-            # Em caso de erro de rede, manter sessão por mais tempo
-            st.session_state.last_auth_check = current_time
-            return True
-    
-    return True
-
-def get_current_user() -> Optional[Dict]:
-    """Retorna dados do usuário atual"""
-    return st.session_state.get("user")
-
-def has_permission(permission: str) -> bool:
-    """Verifica se o usuário tem uma permissão específica"""
-    user = get_current_user()
-    if not user:
-        return False
-    
-    # Mapear roles para permissões
-    role_permissions = {
-        "admin": [
-            "read_documents", "write_documents", "manage_users", 
-            "view_admin_panel", "delete_documents", "view_system_logs"
-        ],
-        "user": [
-            "read_documents", "write_documents"
-        ]
+    # CSS para página de login
+    st.markdown("""
+    <style>
+    .login-container {
+        max-width: 500px;
+        margin: 0 auto;
+        padding: 2rem;
+        background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #2563eb 100%);
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        color: white;
     }
     
-    user_role = user.get("role", "user")
-    return permission in role_permissions.get(user_role, [])
+    .login-title {
+        text-align: center;
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+    
+    .login-subtitle {
+        text-align: center;
+        font-size: 1.2rem;
+        margin-bottom: 2rem;
+        opacity: 0.9;
+    }
+    
+    .login-form {
+        background: rgba(255, 255, 255, 0.1);
+       
+        border-radius: 15px;
+        backdrop-filter: blur(10px);
+      
+    }
+    
+    .stTextInput > div > div > input {
+        background: rgba(255, 255, 255, 0.9);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 10px;
+        color: #1e3a8a;
+        font-weight: 500;
+    }
+    
+    .stTextInput > div > div > input:focus {
+        border-color: #60a5fa;
+        box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.3);
+    }
+    
+    .stButton > button {
+        background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+    }
+    
+    .stButton > button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    # Container principal
+    st.markdown("""
+    <div class="login-container">
+        <h1 class="login-title">TasqAI - Docs</h1>
+        <p class="login-subtitle">Sistema Inteligente de Busca de Documentos</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Formulário de login/cadastro
+    col1, col2, col3 = st.columns([1, 2, 1])
+    
+    with col2:
+        st.markdown('<div class="login-form">', unsafe_allow_html=True)
+        
+        # Mostrar página de login ou cadastro
+        if st.session_state.get("show_register", False):
+            render_register_page()
+        else:
+            render_login_page()
+        
+        st.markdown('</div>', unsafe_allow_html=True)
+    
+ 
 
-def is_admin() -> bool:
-    """Verifica se o usuário é administrador"""
-    user = get_current_user()
-    return user and user.get("role") == "admin"
+# Funções de autenticação agora são gerenciadas pelo session_manager

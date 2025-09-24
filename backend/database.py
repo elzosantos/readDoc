@@ -56,11 +56,6 @@ class DatabaseManager:
                 )
             """)
             
-            conn.commit()
-            
-            # Limpar sessões expiradas
-            self._cleanup_expired_sessions()
-            
             # Inserir permissões padrão
             self._insert_default_permissions(cursor)
             
@@ -68,6 +63,9 @@ class DatabaseManager:
             self._create_default_admin(cursor)
             
             conn.commit()
+            
+            # Limpar sessões expiradas
+            self._cleanup_expired_sessions()
     
     def _cleanup_expired_sessions(self):
         """Remove sessões expiradas do banco de dados"""
@@ -238,6 +236,10 @@ class DatabaseManager:
                     return {"success": False, "message": "Usuário desativado"}
                 
                 # Renovar token se estiver próximo do vencimento (menos de 2 horas)
+                # Converter expires_at para datetime se for string
+                if isinstance(expires_at, str):
+                    expires_at = datetime.fromisoformat(expires_at.replace('Z', '+00:00'))
+                
                 time_until_expiry = expires_at - datetime.now()
                 if time_until_expiry.total_seconds() < 7200:  # 2 horas em segundos
                     new_expires_at = datetime.now() + timedelta(hours=8)

@@ -17,7 +17,7 @@ def main():
         subprocess.run([
             sys.executable, "-m", "streamlit", "run", "streamlit_app.py",
             "--server.port", "8501",
-            "--server.address", "0.0.0.0"
+            "--server.address", "localhost"
         ])
     except KeyboardInterrupt:
         print("\n🛑 Frontend interrompido pelo usuário")
