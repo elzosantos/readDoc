@@ -268,9 +268,18 @@ async def upload_document(
         
         # Salvar arquivo temporariamente
         temp_file_path = os.path.join(temp_dir, file.filename)
-        with open(temp_file_path, "wb") as buffer:
-            content = await file.read()
-            buffer.write(content)
+        
+        # Garantir que o arquivo seja salvo corretamente
+        try:
+            with open(temp_file_path, "wb") as buffer:
+                content = await file.read()
+                buffer.write(content)
+                buffer.flush()  # Garantir que os dados sejam escritos
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Erro ao salvar arquivo temporário: {str(e)}"
+            )
         
         try:
             # Carregar documento usando o serviço
@@ -283,7 +292,7 @@ async def upload_document(
             return LoadDocumentResponse(
                 success=True,
                 message=f"Documento '{file.filename}' carregado com sucesso!",
-                documents_count=result.get("documents_count", 0)
+                documents_count=result
             )
             
         finally:
@@ -309,6 +318,80 @@ async def get_current_user_info(
         "user": current_user,
         "message": "Informações do usuário obtidas com sucesso"
     }
+
+@app.post("/test/upload")
+async def test_upload(
+    file: UploadFile = File(...),
+    current_user: dict = Depends(require_write_permission)
+):
+    """Endpoint de teste para upload de arquivos."""
+    try:
+        # Verificar se o arquivo é válido
+        if not file.filename:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Nome do arquivo não fornecido"
+            )
+        
+        # Verificar extensão do arquivo
+        allowed_extensions = ['.txt', '.pdf', '.docx', '.md']
+        file_extension = os.path.splitext(file.filename)[1].lower()
+        if file_extension not in allowed_extensions:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Tipo de arquivo não suportado. Tipos permitidos: {', '.join(allowed_extensions)}"
+            )
+        
+        # Criar diretório temporário se não existir
+        temp_dir = "temp_uploads"
+        os.makedirs(temp_dir, exist_ok=True)
+        
+        # Salvar arquivo temporariamente
+        temp_file_path = os.path.join(temp_dir, file.filename)
+        
+        # Garantir que o arquivo seja salvo corretamente
+        try:
+            with open(temp_file_path, "wb") as buffer:
+                content = await file.read()
+                buffer.write(content)
+                buffer.flush()
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Erro ao salvar arquivo temporário: {str(e)}"
+            )
+        
+        # Verificar se o arquivo foi salvo
+        if not os.path.exists(temp_file_path):
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Arquivo não foi salvo corretamente"
+            )
+        
+        # Verificar tamanho do arquivo
+        file_size = os.path.getsize(temp_file_path)
+        
+        # Limpar arquivo temporário
+        try:
+            os.remove(temp_file_path)
+        except:
+            pass
+        
+        return {
+            "success": True,
+            "message": f"Arquivo '{file.filename}' recebido com sucesso!",
+            "file_size": file_size,
+            "file_extension": file_extension,
+            "user": current_user.get("name", "Unknown")
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Erro interno no teste de upload: {str(e)}"
+        )
 
 
 @app.get("/admin/tokens")

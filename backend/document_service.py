@@ -10,7 +10,7 @@ from datetime import datetime
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_chroma import Chroma
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_community.document_loaders import TextLoader, PyPDFLoader
+from langchain_community.document_loaders import TextLoader, PyPDFLoader, Docx2txtLoader
 from langchain.chains import RetrievalQA
 from langchain.prompts import PromptTemplate
 
@@ -22,6 +22,9 @@ class DocumentService:
     
     def __init__(self):
         """Inicializa o serviço de documentos."""
+        if not OPENAI_API_KEY:
+            raise Exception("OPENAI_API_KEY não está configurada. Configure a variável de ambiente OPENAI_API_KEY.")
+        
         self.llm = ChatOpenAI(
             model_name=MODEL_NAME,
             temperature=TEMPERATURE,
@@ -60,6 +63,8 @@ class DocumentService:
             # Carregar documento baseado na extensão
             if file_path.endswith('.pdf'):
                 loader = PyPDFLoader(file_path)
+            elif file_path.endswith('.docx'):
+                loader = Docx2txtLoader(file_path)
             else:
                 loader = TextLoader(file_path, encoding='utf-8')
             
@@ -79,6 +84,8 @@ class DocumentService:
             return len(chunks)
             
         except Exception as e:
+            print(f"Erro detalhado ao carregar documento: {str(e)}")
+            print(f"Tipo do erro: {type(e).__name__}")
             raise Exception(f"Erro ao carregar documento: {str(e)}")
     
     async def query_documents(self, query: str, lambda_mult: float = 0.8, k_documents: int = 4) -> tuple:
