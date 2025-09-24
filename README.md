@@ -142,6 +142,56 @@ curl -X GET "http://localhost:8000/admin/tokens" \
      -H "Authorization: Bearer seu_token_secreto_aqui"
 ```
 
+### 🖥️ Interface Web (Streamlit)
+
+#### 1. Instalar Dependências do Frontend
+
+```bash
+pip install -r requirements_frontend.txt
+```
+
+#### 2. Executar o Sistema (Versão Simplificada - Recomendada)
+
+**Terminal 1 - Backend:**
+```bash
+python run_api_simple.py
+```
+
+**Terminal 2 - Frontend:**
+```bash
+python run_frontend_simple.py
+```
+
+#### 3. Testar o Sistema
+
+```bash
+python test_system.py
+```
+
+Este script verifica se ambos os serviços estão funcionando corretamente.
+
+#### 4. URLs de Acesso
+
+- **Frontend**: http://localhost:8501
+- **API**: http://localhost:8000
+- **Documentação**: http://localhost:8000/docs
+
+#### 5. Funcionalidades da Interface
+
+- **💬 Chat**: Interface de conversação com IA
+- **📁 Gerenciar Arquivos**: Carregar e visualizar documentos
+- **📚 Histórico**: Acompanhar conversas anteriores
+- **⚙️ Configurações**: Gerenciar tokens e configurações
+- **🔐 Autenticação**: Configuração de Bearer Tokens
+
+#### 6. Como Usar a Interface
+
+1. **Configure o Token**: Na sidebar, insira seu Bearer Token
+2. **Teste a Conexão**: Clique em "Testar Conexão" para verificar
+3. **Navegue**: Use os botões na sidebar para alternar entre páginas
+4. **Chat**: Digite perguntas na área de chat
+5. **Arquivos**: Carregue novos documentos na página de arquivos
+
 ### 💻 Interface de Linha de Comando (Legado)
 
 #### Carregar Documentos
