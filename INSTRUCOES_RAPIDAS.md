@@ -1,68 +1,138 @@
-# 🚀 Instruções Rápidas - LLMChat
+# 🚀 Instruções Rápidas - Sistema Reorganizado
 
-## ⚡ Execução Rápida
+## 📁 Estrutura do Projeto
 
-### 1. Instalar Dependências
+```
+📁 readDoc/
+├── 📁 backend/          # API REST (FastAPI)
+├── 📁 frontend/         # Interface Web (Streamlit)
+├── 📄 start_backend.py  # Iniciar apenas backend
+├── 📄 start_frontend.py # Iniciar apenas frontend
+├── 📄 start_full_system.py # Iniciar sistema completo
+└── 📄 README.md         # Documentação principal
+```
+
+## ⚡ Início Rápido
+
+### 1. Configuração Inicial
+
 ```bash
+# Backend
+cd backend
 pip install -r requirements.txt
+cp env_example.txt .env
+# Edite o .env com sua chave OpenAI
+
+# Frontend
+cd ../frontend
 pip install -r requirements_frontend.txt
 ```
 
 ### 2. Executar Sistema
 
-**Terminal 1 (Backend):**
+#### Opção 1: Sistema Completo (Recomendado)
 ```bash
-python run_api_simple.py
+python start_full_system.py
 ```
 
-**Terminal 2 (Frontend):**
+#### Opção 2: Separadamente
 ```bash
-python run_frontend_simple.py
+# Terminal 1 - Backend
+python start_backend.py
+
+# Terminal 2 - Frontend
+python start_frontend.py
 ```
 
-### 3. Testar Sistema
-```bash
-python test_system.py
-```
-
-## 🌐 Acessos
+### 3. Acessar
 
 - **Frontend**: http://localhost:8501
+- **API Docs**: http://localhost:8000/docs
 - **API**: http://localhost:8000
-- **Documentação**: http://localhost:8000/docs
 
-## 🔐 Tokens para Teste
+## 🔧 Comandos Úteis
 
-- `seu_token_secreto_aqui` (Admin)
-- `admin_token_123` (Admin)
-- `user_token_456` (User)
+### Testar Sistema
+```bash
+python test_reorganized_system.py
+```
 
-## 🎯 Como Usar
+### Parar Sistema
+```bash
+# Windows
+taskkill /f /im python.exe
 
-1. **Acesse**: http://localhost:8501
-2. **Configure Token**: Na sidebar, insira um dos tokens acima
-3. **Teste Conexão**: Clique em "Testar Conexão"
-4. **Navegue**: Use os botões da sidebar
-5. **Chat**: Digite perguntas na área de chat
-6. **Arquivos**: Carregue documentos na página "Gerenciar Arquivos"
+# Linux/Mac
+pkill -f python
+```
 
-## 🐛 Problemas Comuns
+### Verificar Status
+```bash
+# Testar API
+curl http://localhost:8000/health
 
-### API não conecta
-- Verifique se `python run_api_simple.py` está rodando
-- Teste: http://localhost:8000/health
+# Testar Frontend
+curl http://localhost:8501
+```
 
-### Frontend não carrega
-- Verifique se `python run_frontend_simple.py` está rodando
-- Teste: http://localhost:8501
+## 📚 Documentação
 
-### Token inválido
-- Use um dos tokens listados acima
-- Verifique se não há espaços extras
+- **[README Principal](README.md)**: Visão geral do projeto
+- **[Backend README](backend/README.md)**: Documentação da API
+- **[Frontend README](frontend/README.md)**: Documentação da interface
+
+## 🔐 Autenticação
+
+Token padrão: `seu_token_secreto_aqui`
+
+Configure no frontend ou use nos headers:
+```
+Authorization: Bearer seu_token_secreto_aqui
+```
+
+## 🎯 Funcionalidades
+
+### Backend
+- ✅ API REST com FastAPI
+- ✅ Autenticação Bearer Token
+- ✅ Carregamento de documentos
+- ✅ Busca inteligente com IA
+- ✅ Armazenamento vetorial
+
+### Frontend
+- ✅ Interface de chat moderna
+- ✅ Histórico com nomes contextuais
+- ✅ Gerenciamento de arquivos
+- ✅ Configurações de autenticação
+- ✅ Navegação intuitiva
+
+## 🐛 Solução de Problemas
+
+### Erro de Porta
+```bash
+taskkill /f /im python.exe
+```
+
+### Erro de Dependências
+```bash
+# Backend
+cd backend && pip install -r requirements.txt
+
+# Frontend
+cd frontend && pip install -r requirements_frontend.txt
+```
+
+### Erro de Configuração
+- Verifique o arquivo `.env` no backend
+- Confirme a chave OpenAI
+- Teste a conectividade
 
 ## 📞 Suporte
 
-Se algo não funcionar:
-1. Execute `python test_system.py`
-2. Verifique os logs nos terminais
-3. Confirme se as portas 8000 e 8501 estão livres
+- Consulte os READMEs específicos
+- Verifique os logs do console
+- Teste com `python test_reorganized_system.py`
+
+---
+
+**Sistema reorganizado e funcionando! 🎉**
